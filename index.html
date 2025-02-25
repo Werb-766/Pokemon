@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pokemon Filter</title>
+  <style>
+    body {
+      background-color: #2c2c2c;
+      color: #fff;
+      font-family: Arial, sans-serif;
+      text-align: center;
+    }
+    header {
+      background-color: #000;
+      padding: 20px;
+    }
+    header img {
+      max-width: 200px;
+    }
+    .search-bar {
+      margin: 20px;
+    }
+    .search-bar input, .search-bar select, .search-bar button {
+      padding: 10px;
+      margin: 5px;
+      border-radius: 5px;
+      border: none;
+    }
+    .search-bar button {
+      background-color: #4CAF50;
+      color: white;
+      cursor: pointer;
+    }
+    .pokemon-container {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 20px;
+    }
+    .pokemon-card {
+      background-color: yellow;
+      color: black;
+      border-radius: 10px;
+      padding: 20px;
+      width: 150px;
+      position: relative;
+    }
+    .pokemon-card img {
+      width: 100px;
+      height: 100px;
+    }
+    .pokemon-card .category {
+      background-color: lightblue;
+      padding: 5px;
+      border-radius: 5px;
+      margin: 5px 0;
+    }
+    .pokemon-card .id {
+      position: absolute;
+      top: 5px;
+      right: 5px;
+      background-color: red;
+      color: white;
+      padding: 2px 5px;
+      border-radius: 5px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/1.png" alt="Pokemon Logo">
+  </header>
+  
+  <div class="search-bar">
+    <input type="text" id="searchInput" placeholder="Search your Pokemon" oninput="filterPokemons()">
+    <select id="categoryFilter" onchange="filterPokemons()">
+      <option value="all">All</option>
+      <option value="Grass">Grass</option>
+      <option value="Poison">Poison</option>
+      <option value="Fire">Fire</option>
+      <option value="Water">Water</option>
+      <option value="Bug">Bug</option>
+      <option value="Flying">Flying</option>
+      <option value="Normal">Normal</option>
+      <option value="Electric">Electric</option>
+    </select>
+    <select id="weightFilter" onchange="filterPokemons()">
+      <option value="all">All Weights</option>
+      <option value="light">Less than 20 kg</option>
+      <option value="medium">20 - 50 kg</option>
+      <option value="heavy">More than 50 kg</option>
+    </select>
+    <button onclick="filterPokemons()">Search</button>
+  </div>
+  
+  <div class="pokemon-container" id="pokemonContainer">
+    <!-- Cards will be dynamically inserted here -->
+  </div>
+
+  <script>
+    // Автоматически сгенерированный список покемонов до 150
+    const pokemons = Array.from({ length: 150 }, (_, i) => {
+      const id = String(i + 1).padStart(3, '0');
+      return {
+        id: id,
+        name: `Pokemon ${id}`,
+        category: ['Normal'],
+        candyCount: i % 3 === 0 ? 25 : (i % 3 === 1 ? 50 : 'undefined'),
+        weight: `${(i + 1) * 2} kg`,
+        image: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${i + 1}.png`
+      };
+    });
+
+    function displayPokemons(pokemonList) {
+      const container = document.getElementById('pokemonContainer');
+      container.innerHTML = '';
+      pokemonList.forEach(pokemon => {
+        const card = document.createElement('div');
+        card.className = 'pokemon-card';
+        card.innerHTML = `
+          <div class="id">${pokemon.id}</div>
+          <h3>${pokemon.name}</h3>
+          <img src="${pokemon.image}" alt="${pokemon.name}">
+          <div class="category">${pokemon.category.join(' / ')}</div>
+          <p>Candy Count: ${pokemon.candyCount}</p>
+          <p>Weight: ${pokemon.weight}</p>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    function filterPokemons() {
+      const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+      const category = document.getElementById('categoryFilter').value;
+      const weightCategory = document.getElementById('weightFilter').value;
+
+      const filtered = pokemons.filter(pokemon => {
+        const matchesCategory = category === 'all' || pokemon.category.some(cat => cat.toLowerCase() === category.toLowerCase());
+        const matchesSearch = pokemon.name.toLowerCase().includes(searchTerm);
+        const weightValue = parseFloat(pokemon.weight);
+        let matchesWeight = true;
+
+        if (weightCategory === 'light') matchesWeight = weightValue < 20;
+        else if (weightCategory === 'medium') matchesWeight = weightValue >= 20 && weightValue <= 50;
+        else if (weightCategory === 'heavy') matchesWeight = weightValue > 50;
+
+        return matchesCategory && matchesSearch && matchesWeight;
+      });
+
+      displayPokemons(filtered);
+    }
+
+    // Initial display
+    displayPokemons(pokemons);
+  </script>
+</body>
+</html>
